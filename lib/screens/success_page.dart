@@ -11,17 +11,16 @@ class SuccessPage extends StatefulWidget {
 
 class _SuccessPageState extends State<SuccessPage> {
   bool _canGoBack = false;
+  final double timer=globals.timer;
   
   @override
   void initState() {
     super.initState();
-    // Allow back navigation after 3 seconds
-    Timer(const Duration(seconds: 3), () {
+    Timer(Duration(seconds: timer.toInt()), () {
       if (mounted) {
         setState(() {
           _canGoBack = true;
         });
-        // Auto-redirect to home after 3 seconds
         Navigator.pushReplacementNamed(context, '/home');
       }
     });
