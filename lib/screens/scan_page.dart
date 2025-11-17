@@ -153,27 +153,84 @@ class _ScanPageState extends State<ScanPage> {
             onDetect: _onDetect,
             fit: BoxFit.cover,
           ),
-          
           // Scanning frame
           Center(
-            child: Container(
+            child: SizedBox(
               width: 250,
               height: 250,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.yellow,
-                  width: 3,
-                ),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Icon(
-                Icons.center_focus_weak,
-                size: 80,
-                color: Colors.yellow,
+              child: Stack(
+                children: [
+                  // Top-left corner
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: Colors.white, width: 3),
+                          left: BorderSide(color: Colors.white, width: 3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Top-right corner
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: Colors.white, width: 3),
+                          right: BorderSide(color: Colors.white, width: 3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Bottom-left corner
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.white, width: 3),
+                          left: BorderSide(color: Colors.white, width: 3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Bottom-right corner
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.white, width: 3),
+                          right: BorderSide(color: Colors.white, width: 3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Icon(
+                      Icons.center_focus_weak,
+                      size: 80,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          
           // Reset zoom button (only visible when zoomed in)
           if (_zoomScale > 1.0 + 0.1) // 0.1 buffer to hide when close to min
             Positioned(
