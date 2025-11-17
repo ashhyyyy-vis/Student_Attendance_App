@@ -19,6 +19,9 @@ class _SuccessPageState extends State<SuccessPage> {
   @override
   void initState() {
     super.initState();
+    // Load saved countdown time
+    _loadCountdown();
+    
     // Save current route to persist on app restart (only once)
     if (!_routeSaved) {
       _saveCurrentRoute();
@@ -26,23 +29,66 @@ class _SuccessPageState extends State<SuccessPage> {
     }
     
     Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      
+      if (_countdown > 0) {
         setState(() {
           _countdown--;
-          if (_countdown <= 0) {
-            _canGoBack = true;
-            timer.cancel();
-            Navigator.pushReplacementNamed(context, '/home');
-          }
+          _saveCountdown(); // Save countdown every second
         });
+      } else {
+        timer.cancel();
+        _clearCountdown(); // Clear countdown when done
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     });
+  }
+  
+  void _loadCountdown() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedCountdown = prefs.getInt('success_countdown');
+    final savedTime = prefs.getInt('success_countdown_time');
+    
+    if (savedCountdown != null && savedTime != null) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final elapsedSeconds = ((now - savedTime) / 1000).floor();
+      
+      // Calculate remaining countdown, but don't go below 0
+      setState(() {
+        _countdown = (savedCountdown - elapsedSeconds).clamp(0, 90);
+      });
+    }
+  }
+  
+  void _saveCountdown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('success_countdown', _countdown);
+    await prefs.setInt('success_countdown_time', DateTime.now().millisecondsSinceEpoch);
+  }
+  
+  void _clearCountdown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('success_countdown');
+    await prefs.remove('success_countdown_time');
   }
   
   void _saveCurrentRoute() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_route', '/success');
     await prefs.setInt('last_route_time', DateTime.now().millisecondsSinceEpoch);
+    
+    // Clear the route after a short delay to prevent restoration conflicts
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        prefs.remove('last_route');
+        prefs.remove('last_route_time');
+      }
+    });
   }
   
   @override
