@@ -116,12 +116,12 @@ class _LoginPageState extends State<LoginPage> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text("Forgot Password",style: TextStyle(color: Colors.black)),
-                              content: const Text("Please contact the authorities.",style: TextStyle(color: Colors.black)),
+                              title: const Text("Forgot Password",style: TextStyle(color: Colors.white)),
+                              content: const Text("Password Services under development currently.\n Please contact the admin\n admin@iitp.ac.in",style: TextStyle(color: Colors.white)),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text("Close",style: TextStyle(color: Colors.black)),
+                                  child: const Text("Close",style: TextStyle(color: Colors.white)),
                                 ),
                               ],
                             );
@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: _login,
-                            child: const Text('Login', style: TextStyle(color: Colors.black)),
+                            child: const Text('Login', style: TextStyle(color: Colors.white)),
                           ),
                   ],
                 ),
