@@ -60,59 +60,55 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 Widget _buildStudentCard() {
   return Card(
     margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-    elevation: 8,
+    elevation: 12,
+    shadowColor: Colors.black.withOpacity(0.3),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
     ),
     child: Container(
-      padding: const EdgeInsets.only(
-        top: 70,
-        bottom: 70,
-        left: 15,
-        right: 15,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.8),
+            Colors.grey.shade900,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
+      padding: const EdgeInsets.all(24),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 100,
-            height: 100,
-            color: Colors.grey[300],
-            child: globals.studentLogo != null
-                ? Image.network(
-                    globals.studentLogo!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
-                      );
-                    },
-                  )
-                : Image.asset(
-                    globals.userPic,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
-                      );
-                    },
-                  ),
+          // Profile picture
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: 110,
+              height: 110,
+              color: Colors.grey[800],
+              child: globals.studentLogo != null
+                  ? Image.network(
+                      globals.studentLogo!,
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      globals.userPic,
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.cover,
+                    ),
+            ),
           ),
+
           const SizedBox(width: 24),
+
+          // Info section
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,18 +116,21 @@ Widget _buildStudentCard() {
                 Text(
                   globals.currentUser ?? 'N/A',
                   style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 12),
-                _buildInfoRow('MIS: ${globals.MIS ?? 'N/A'}'),
+
+                const SizedBox(height: 16),
+
+                _buildElegantInfo("MIS", globals.MIS),
                 const SizedBox(height: 8),
-                _buildInfoRow('Department: ${globals.department ?? 'N/A'}'),
+                _buildElegantInfo("Department", globals.department),
                 const SizedBox(height: 8),
-                _buildInfoRow('Class: ${globals.classs ?? 'N/A'}'),
+                _buildElegantInfo("Class", globals.classs),
                 const SizedBox(height: 8),
-                _buildInfoRow('Semester: ${globals.semester ?? 'N/A'}'),
+                _buildElegantInfo("Semester", globals.semester.toString()),
               ],
             ),
           ),
@@ -140,6 +139,35 @@ Widget _buildStudentCard() {
     ),
   );
 }
+
+Widget _buildElegantInfo(String label, String? value) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Text(
+        "$label:",
+        style: TextStyle(
+          color: Colors.grey[300],
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          value ?? 'N/A',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  );
+}
+
 
 // Helper method to create consistent info rows with icons
 Widget _buildInfoRow( String text) {
