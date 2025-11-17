@@ -16,7 +16,7 @@ class _SuccessPageState extends State<SuccessPage> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: timer.toInt()), () {
+    Timer(const Duration(seconds: 90), () {
       if (mounted) {
         setState(() {
           _canGoBack = true;
