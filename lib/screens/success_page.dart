@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/globals.dart' as globals;
 import 'dart:async';
 
@@ -11,11 +12,18 @@ class SuccessPage extends StatefulWidget {
 
 class _SuccessPageState extends State<SuccessPage> {
   bool _canGoBack = false;
+  bool _routeSaved = false;
   final double timer=globals.timer;
   
   @override
   void initState() {
     super.initState();
+    // Save current route to persist on app restart (only once)
+    if (!_routeSaved) {
+      _saveCurrentRoute();
+      _routeSaved = true;
+    }
+    
     Timer(const Duration(seconds: 90), () {
       if (mounted) {
         setState(() {
@@ -24,6 +32,12 @@ class _SuccessPageState extends State<SuccessPage> {
         Navigator.pushReplacementNamed(context, '/home');
       }
     });
+  }
+  
+  void _saveCurrentRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_route', '/success');
+    await prefs.setInt('last_route_time', DateTime.now().millisecondsSinceEpoch);
   }
   
   @override

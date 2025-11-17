@@ -40,7 +40,9 @@ class QRAuthService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        globals.timer=(responseData['timer']-scannedAt)/1000;
+        if (responseData['timer'] != null) {
+          globals.timer=(responseData['timer']-scannedAt)/1000;
+        }
         return {
           'success': true,
           'message': responseData['message'] ?? 'QR token submitted successfully',

@@ -58,11 +58,11 @@ class _ScanPageState extends State<ScanPage> {
         
       } else {
         _showErrorSnackBar((result['message'] as String?) ?? 'Authentication failed');
-        _controller.start();
+        //_controller.start();
       }
     } catch (e) {
       _showErrorSnackBar('Error: ${e.toString()}');
-      _controller.start();
+      //_controller.start();
     }
   }
 

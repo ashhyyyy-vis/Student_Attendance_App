@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_page.dart';
 import 'screens/home_page.dart';
 import 'screens/scan_page.dart';
@@ -10,9 +11,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final isLoggedIn = await AuthService.isTokenValid();
   
-  runApp(MyApp(
-    initialRoute: isLoggedIn ? '/home' : '/',
-  ));
+  String initialRoute = '/';
+  if (isLoggedIn) {
+    final prefs = await SharedPreferences.getInstance();
+    final lastRoute = prefs.getString('last_route');
+    final lastRouteTime = prefs.getInt('last_route_time');
+    final now = DateTime.now().millisecondsSinceEpoch;
+    
+    // Only restore route if it was set within the last 5 minutes
+    if (lastRoute != null && lastRouteTime != null && (now - lastRouteTime) < 300000) {
+      initialRoute = lastRoute;
+    } else {
+      initialRoute = '/home';
+    }
+  }
+  
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
@@ -40,6 +54,19 @@ class MyApp extends StatelessWidget {
         '/success': (context) => SuccessPage(),
         '/attendance': (context) => AttendancePage(),
       },
+      onGenerateRoute: (settings) {
+        // Save the current route when navigating (except success page which handles it itself)
+        if (settings.name != null && settings.name != '/' && settings.name != '/success') {
+          _saveCurrentRoute(settings.name!);
+        }
+        return null;
+      },
     );
+  }
+  
+  static void _saveCurrentRoute(String route) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_route', route);
+    await prefs.setInt('last_route_time', DateTime.now().millisecondsSinceEpoch);
   }
 }
