@@ -41,7 +41,7 @@ class _ScanPageState extends State<ScanPage> {
     for (final barcode in barcodes) {
       if (barcode.rawValue != null) {
         // Stop scanning while processing
-        _controller.stop();
+        //_controller.stop();
         
         // Submit QR token for authentication and handle result
         _handleQRSubmission(barcode.rawValue!);
@@ -156,8 +156,8 @@ class _ScanPageState extends State<ScanPage> {
           // Scanning frame
           Center(
             child: SizedBox(
-              width: 250,
-              height: 250,
+              width: 100,
+              height: 100,
               child: Stack(
                 children: [
                   // Top-left corner
@@ -165,8 +165,8 @@ class _ScanPageState extends State<ScanPage> {
                     top: 0,
                     left: 0,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       decoration: const BoxDecoration(
                         border: Border(
                           top: BorderSide(color: Colors.white, width: 3),
@@ -180,8 +180,8 @@ class _ScanPageState extends State<ScanPage> {
                     top: 0,
                     right: 0,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       decoration: const BoxDecoration(
                         border: Border(
                           top: BorderSide(color: Colors.white, width: 3),
@@ -195,8 +195,8 @@ class _ScanPageState extends State<ScanPage> {
                     bottom: 0,
                     left: 0,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(color: Colors.white, width: 3),
@@ -210,8 +210,8 @@ class _ScanPageState extends State<ScanPage> {
                     bottom: 0,
                     right: 0,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(color: Colors.white, width: 3),
@@ -223,7 +223,7 @@ class _ScanPageState extends State<ScanPage> {
                   Center(
                     child: Icon(
                       Icons.center_focus_weak,
-                      size: 80,
+                      size: 30,
                       color: Colors.white,
                     ),
                   ),
@@ -270,6 +270,7 @@ class _ScanPageState extends State<ScanPage> {
                   max: 5.0,
                   divisions: 40,
                   onChanged: _onZoomChanged,
+                  reversed: true,
                   activeColor: Colors.blueAccent,
                   inactiveColor: Colors.white54,
                   thumbColor: Colors.lightBlue,
