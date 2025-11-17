@@ -112,13 +112,15 @@ class AttendancePage extends StatelessWidget {
                       ),
               ),
               const SizedBox(height: 12),
-              const SizedBox(height: 12),
               Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Back'),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Back'),
+                  ),
                 ),
               ),
             ],
