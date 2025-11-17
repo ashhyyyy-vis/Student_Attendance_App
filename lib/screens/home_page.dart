@@ -165,7 +165,6 @@ Widget _buildInfoRow(IconData icon, String text) {
                   label: 'Scan QR for Attendance',
                   icon: Icons.qr_code_scanner,
                   onPressed: () {
-                    globals.scannedToday = false;
                     Navigator.pushNamed(context, '/scan');
                   },
                 ),

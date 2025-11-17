@@ -275,29 +275,77 @@ class _ScanPageState extends State<ScanPage> {
   List<Widget> _buildCornerMarker(Alignment alignment) {
     const double markerSize = 25.0;
     const double markerThickness = 3.0;
-    const Color markerColor = Colors.white;
+    const Color markerColor = Colors.lightBlue;
+    const double cornerRadius = 8.0; // Radius for rounded corners
 
     // Use Align to position the markers relative to the SizedBox bounds
     return [
-      Align(
-        alignment: alignment,
+      // Horizontal line with rounded end
+      Positioned(
+        left: alignment == Alignment.topLeft || alignment == Alignment.bottomLeft
+            ? 0
+            : null,
+        right: alignment == Alignment.topRight || alignment == Alignment.bottomRight
+            ? 0
+            : null,
+        top: alignment == Alignment.topLeft || alignment == Alignment.topRight
+            ? 0
+            : null,
+        bottom: alignment == Alignment.bottomLeft ||
+                alignment == Alignment.bottomRight
+            ? 0
+            : null,
         child: Container(
           width: markerSize,
+          height: markerThickness,
+          decoration: BoxDecoration(
+            color: markerColor,
+            borderRadius: BorderRadius.horizontal(
+              left: Radius.circular(
+                (alignment == Alignment.topLeft || alignment == Alignment.bottomLeft) 
+                    ? cornerRadius 
+                    : 0.0
+              ),
+              right: Radius.circular(
+                (alignment == Alignment.topRight || alignment == Alignment.bottomRight) 
+                    ? cornerRadius 
+                    : 0.0
+              ),
+            ),
+          ),
+        ),
+      ),
+      // Vertical line with rounded end
+      Positioned(
+        left: alignment == Alignment.topLeft || alignment == Alignment.bottomLeft
+            ? 0
+            : null,
+        right: alignment == Alignment.topRight || alignment == Alignment.bottomRight
+            ? 0
+            : null,
+        top: alignment == Alignment.topLeft || alignment == Alignment.topRight
+            ? 0
+            : null,
+        bottom: alignment == Alignment.bottomLeft ||
+                alignment == Alignment.bottomRight
+            ? 0
+            : null,
+        child: Container(
+          width: markerThickness,
           height: markerSize,
           decoration: BoxDecoration(
-            border: Border(
-              top: (alignment == Alignment.topLeft || alignment == Alignment.topRight) 
-                  ? const BorderSide(color: markerColor, width: markerThickness) 
-                  : BorderSide.none,
-              bottom: (alignment == Alignment.bottomLeft || alignment == Alignment.bottomRight) 
-                  ? const BorderSide(color: markerColor, width: markerThickness) 
-                  : BorderSide.none,
-              left: (alignment == Alignment.topLeft || alignment == Alignment.bottomLeft) 
-                  ? const BorderSide(color: markerColor, width: markerThickness) 
-                  : BorderSide.none,
-              right: (alignment == Alignment.topRight || alignment == Alignment.bottomRight) 
-                  ? const BorderSide(color: markerColor, width: markerThickness) 
-                  : BorderSide.none,
+            color: markerColor,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(
+                (alignment == Alignment.topLeft || alignment == Alignment.topRight) 
+                    ? cornerRadius 
+                    : 0.0
+              ),
+              bottom: Radius.circular(
+                (alignment == Alignment.bottomLeft || alignment == Alignment.bottomRight) 
+                    ? cornerRadius 
+                    : 0.0
+              ),
             ),
           ),
         ),
