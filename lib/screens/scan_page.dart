@@ -54,6 +54,7 @@ class _ScanPageState extends State<ScanPage> {
       final result = await QRAuthService.submitQRToken(qrCode);
 
       if (result['success'] == true) {
+       _controller.stop();
        Navigator.pushNamed(context, '/success');
         
       } else {

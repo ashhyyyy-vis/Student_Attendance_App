@@ -59,9 +59,19 @@ class _SuccessPageState extends State<SuccessPage> {
       final elapsedSeconds = ((now - savedTime) / 1000).floor();
       
       // Calculate remaining countdown, but don't go below 0
-      setState(() {
-        _countdown = (savedCountdown - elapsedSeconds).clamp(0, 90);
-      });
+      final remaining = savedCountdown - elapsedSeconds;
+      if (remaining > 0) {
+        setState(() {
+          _countdown = remaining;
+        });
+      } else {
+        // If countdown expired, clear route and navigate to home
+        _clearRoute();
+        _clearCountdown();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
     }
   }
   
@@ -75,6 +85,12 @@ class _SuccessPageState extends State<SuccessPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('success_countdown');
     await prefs.remove('success_countdown_time');
+  }
+  
+  void _clearRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_route');
+    await prefs.remove('last_route_time');
   }
   
   void _saveCurrentRoute() async {
