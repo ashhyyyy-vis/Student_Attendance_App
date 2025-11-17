@@ -14,6 +14,7 @@ class _SuccessPageState extends State<SuccessPage> {
   bool _canGoBack = false;
   bool _routeSaved = false;
   final double timer=globals.timer;
+  int _countdown = 90;
   
   @override
   void initState() {
@@ -24,12 +25,16 @@ class _SuccessPageState extends State<SuccessPage> {
       _routeSaved = true;
     }
     
-    Timer(const Duration(seconds: 90), () {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
-          _canGoBack = true;
+          _countdown--;
+          if (_countdown <= 0) {
+            _canGoBack = true;
+            timer.cancel();
+            Navigator.pushReplacementNamed(context, '/home');
+          }
         });
-        Navigator.pushReplacementNamed(context, '/home');
       }
     });
   }
@@ -67,16 +72,9 @@ class _SuccessPageState extends State<SuccessPage> {
               Text('Attendance marked!', style: TextStyle(fontSize: 22)),
               SizedBox(height: 8),
               Text('Thanks, $user. Your presence has been recorded.'),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _canGoBack ? () {
-                  Navigator.pushReplacementNamed(context, '/home');
-                } : null,
-                child: Text('Back to Home'),
-              ),
               if (!_canGoBack)
                 Text(
-                  'Please wait 3 seconds...',
+                  'Redirecting in $_countdown seconds...',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
             ],
