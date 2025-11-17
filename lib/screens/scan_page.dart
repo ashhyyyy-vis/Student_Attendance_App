@@ -207,15 +207,7 @@ class _ScanPageState extends State<ScanPage> {
                   ..._buildCornerMarker(Alignment.topRight),
                   ..._buildCornerMarker(Alignment.bottomLeft),
                   ..._buildCornerMarker(Alignment.bottomRight),
-                  
                   // Center icon (optional, for visual guide)
-                  const Center(
-                    child: Icon(
-                      Icons.center_focus_weak,
-                      size: 40,
-                      color: Colors.white70,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -283,7 +275,7 @@ class _ScanPageState extends State<ScanPage> {
   List<Widget> _buildCornerMarker(Alignment alignment) {
     const double markerSize = 25.0;
     const double markerThickness = 3.0;
-    const Color markerColor = Colors.yellow;
+    const Color markerColor = Colors.white;
 
     // Use Align to position the markers relative to the SizedBox bounds
     return [
