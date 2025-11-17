@@ -1,0 +1,129 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
+import '../utils/globals.dart' as globals;
+import '../service/auth_service.dart';
+
+class QRAuthService {
+  static const _storage = FlutterSecureStorage(); 
+  static Future<Map<String, dynamic>> submitQRToken(String qrToken) async {
+    try {
+      // Get auth token from secure storage
+      final String? token = await _storage.read(key: 'auth_token');
+      
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'Authentication token not found',
+          'data': null
+        };
+      }
+
+      debugPrint('Submitting QR token: $qrToken');
+
+      final response = await http.post(
+        Uri.parse('${globals.baseurl}/api/student/scan'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'qrToken': qrToken,
+          'scannedAt': DateTime.now().toIso8601String(),
+          'role':"student"
+        }),
+      );
+
+      debugPrint('QR submission response status: ${response.statusCode}');
+      debugPrint('QR submission response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'QR token submitted successfully',
+          'data': responseData['data'] ?? null
+        };
+      } else if (response.statusCode == 401) {
+        return {
+          'success': false,
+          'message': 'Authentication expired. Please login again.',
+          'data': null
+        };
+      } else if (response.statusCode == 400) {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Invalid QR token',
+          'data': null
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to submit QR token. Status: ${response.statusCode}',
+          'data': null
+        };
+      }
+    } catch (e) {
+      debugPrint('Error submitting QR token: $e');
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+        'data': null
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> validateQRToken(String qrToken) async {
+    try {
+      final String? token = await _storage.read(key: 'auth_token');
+      
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'Authentication token not found',
+          'data': null
+        };
+      }
+
+      debugPrint('Validating QR token: $qrToken');
+
+      final response = await http.post(
+        Uri.parse('${globals.baseurl}/api/qr/validate'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'qrToken': qrToken,
+        }),
+      );
+
+      debugPrint('QR validation response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'QR token is valid',
+          'sessionId': responseData['data'] ?? null
+        };
+      } else {
+        final responseData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Invalid QR token',
+          'sessionId': null
+        };
+      }
+    } catch (e) {
+      debugPrint('Error validating QR token: $e');
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+        'sessionId': null
+      };
+    }
+  }
+}

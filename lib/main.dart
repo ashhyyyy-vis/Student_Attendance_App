@@ -4,12 +4,22 @@ import 'screens/home_page.dart';
 import 'screens/scan_page.dart';
 import 'screens/success_page.dart';
 import 'screens/attendance_page.dart';
+import 'service/auth_service.dart';
 
-void main() {
-  runApp(AttendanceApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final isLoggedIn = await AuthService.isTokenValid();
+  
+  runApp(MyApp(
+    initialRoute: isLoggedIn ? '/home' : '/',
+  ));
 }
 
-class AttendanceApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  final String initialRoute;
+
+  const MyApp({Key? key, required this.initialRoute}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,7 +32,7 @@ class AttendanceApp extends StatelessWidget {
           fontFamily: 'Roboto',
         ),
       ),
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: {
         '/': (context) => LoginPage(),
         '/home': (context) => HomePage(),

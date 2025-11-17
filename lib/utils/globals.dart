@@ -1,11 +1,47 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 //library globals;
+class AttendanceData {
+  final String courseName;
+  final String courseCode;
+  final int present;
+  final int total;
+  
+  AttendanceData({
+    required this.courseName,
+    required this.courseCode,
+    required this.present,
+    required this.total,
+  });
 
-String? currentUser;            // the logged-in username
+  // Add a factory constructor to create AttendanceData from JSON
+  factory AttendanceData.fromJson(Map<String, dynamic> json) {
+    return AttendanceData(
+      courseName: json['courseName'] ?? 'Unknown Course',
+      courseCode: json['courseCode']??'Unknown Course Code',
+      present: json['present'] ?? 0,
+      total: json['total'] ?? 0,
+    );
+  }
+}
+
+
+String? currentUser;
+String? MIS;
+int? semester;
+String? department;
+String? classs;
 bool isLoggedIn = false;
 
-int totalDays = 30;            // demo total days (for percent)
-int attendanceCount = 0;       // how many days attended
 bool scannedToday = false;     // prevents double-marking in same session
 
-// Example valid QR payload (the scanner will match this)
+
 const String validQrPayload = "VALID_QR_123";
+
+const String baseurl="https://situated-encouraging-object-trademarks.trycloudflare.com";
+
+const String wallpaperImage="assets/images/wallpaperImage.jpg";
+String? studentLogo;
+const String userPic="assets/images/studentLogo.jpg";
+const String logoSmall = "assets/images/collegeLogoSmall.png";
+const String logoLarge = "assets/images/collegeLogoLarge.png";
+List <AttendanceData> attendanceData = [];
