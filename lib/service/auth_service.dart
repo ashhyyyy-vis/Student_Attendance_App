@@ -49,7 +49,7 @@ class AuthService {
 
         final token = responseData['data']['token'];
         final id = responseData['data']['user']['id'].toString();
-        globals.currentUser=responseData['data']['user']['firstName'];
+        globals.currentUser=responseData['data']['user']['firstName']+" "+ responseData['data']['user']['lastName'];
         globals.MIS=responseData['data']['user']['MIS'];
         globals.semester=responseData['data']['user']['semester'];
         

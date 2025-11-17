@@ -13,7 +13,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
    bool _isFetchingAttendance = false;
-
   @override
   void initState() {
     super.initState();
@@ -62,28 +61,58 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStudentCard() {
+Widget _buildStudentCard() {
   return Card(
-    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    elevation: 8,  // Added shadow for depth
+    margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+    elevation: 8,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),  // More rounded corners
+      borderRadius: BorderRadius.circular(16),
     ),
     child: Container(
-      padding: const EdgeInsets.only(top:70,bottom:70,left:15),  // Increased padding
+      padding: const EdgeInsets.only(
+        top: 70,
+        bottom: 70,
+        left: 15,
+        right: 15,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CircleAvatar(
-            radius: 50,  // Increased from 40
-            backgroundColor: Colors.grey[300],
-            backgroundImage: globals.studentLogo != null 
-                ? NetworkImage(globals.studentLogo!)
-                : AssetImage(globals.userPic),
-            onBackgroundImageError: (exception, stackTrace) {
-            },
+          Container(
+            width: 100,
+            height: 100,
+            color: Colors.grey[300],
+            child: globals.studentLogo != null
+                ? Image.network(
+                    globals.studentLogo!,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        color: Colors.grey[300],
+                        child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
+                      );
+                    },
+                  )
+                : Image.asset(
+                    globals.userPic,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        color: Colors.grey[300],
+                        child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
+                      );
+                    },
+                  ),
           ),
-          const SizedBox(width: 24),  // Increased spacing
+          const SizedBox(width: 24),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,20 +120,18 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   globals.currentUser ?? 'N/A',
                   style: const TextStyle(
-                    fontSize: 22,  // Increased from 16
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    //color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildInfoRow(Icons.badge, 'MIS: ${globals.MIS ?? 'N/A'}'),
+                _buildInfoRow('MIS: ${globals.MIS ?? 'N/A'}'),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.school, globals.department ?? 'N/A'),
+                _buildInfoRow('Department: ${globals.department ?? 'N/A'}'),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.phone, globals.classs ?? 'N/A'),
-                const SizedBox(height:8),
-                _buildInfoRow(Icons.class_, 'Semester ${globals.semester ?? 'N/A'}'),
-
+                _buildInfoRow('Class: ${globals.classs ?? 'N/A'}'),
+                const SizedBox(height: 8),
+                _buildInfoRow('Semester: ${globals.semester ?? 'N/A'}'),
               ],
             ),
           ),
@@ -115,10 +142,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 // Helper method to create consistent info rows with icons
-Widget _buildInfoRow(IconData icon, String text) {
+Widget _buildInfoRow( String text) {
   return Row(
     children: [
-      Icon(icon, size: 20, color: Colors.blue[700]),
       const SizedBox(width: 8),
       Text(
         text,
@@ -128,12 +154,14 @@ Widget _buildInfoRow(IconData icon, String text) {
   );
 }
   Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-    bool isLoading = false, 
-  }) {
-    return ElevatedButton.icon(
+  required String label,
+  required IconData icon,
+  required VoidCallback onPressed,
+  bool isLoading = false, 
+}) {
+  return SizedBox(
+    width: 300, // Fixed width for both buttons
+    child: ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
       icon: isLoading
           ? const SizedBox(
@@ -145,12 +173,16 @@ Widget _buildInfoRow(IconData icon, String text) {
               ),
             )
           : Icon(icon),
-      label: Text(isLoading ? 'Fetching Data...' : label),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 36),
+      label: Text(
+        isLoading ? 'Fetching Data...' : label,
+        textAlign: TextAlign.center,
       ),
-    );
-  }
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+      ),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +200,7 @@ Widget _buildInfoRow(IconData icon, String text) {
           ),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Column(
               children: [
                 _buildStudentCard(),
@@ -212,14 +244,19 @@ Widget _buildInfoRow(IconData icon, String text) {
                   },
                 ),
                 const Spacer(),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Image.asset(
-                    globals.logoLarge,
-                    height: 100,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+              // In the build method, replace the existing Align widget with:
+Container(
+  width: 400,
+  color: Colors.black,
+  padding: const EdgeInsets.only(left:1,right:1,top:1,bottom:1),
+  child: Center(
+    child: Image.asset(
+      globals.logoLarge,
+      height: 80,  // Slightly reduced height
+      fit: BoxFit.contain,
+    ),
+  ),
+),
                 const SizedBox(height: 20),
               ],
             ),
