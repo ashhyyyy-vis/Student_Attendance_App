@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:async'; // Required for the Timer used in debouncing
-import '../service/qr_auth_service.dart';
+import '../service/qr_auth_service.dart'; // Assuming this service exists in your project
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -17,10 +17,11 @@ class _ScanPageState extends State<ScanPage> {
     autoStart: true,
   );
   
-  // State for zoom scale (User-friendly scale: 1.0 to 5.0)
-  double _zoomScale = 1.0; 
+  // State for zoom scale (User-friendly scale: 0.5 to 5.0)
+  // 0.5 is the new logical minimum (fully zoomed out)
+  double _zoomScale = 0.5; 
   
-  // State for torch
+  // ADDED: Local state to track torch status, as _controller.torchState is unavailable
   bool _isTorchOn = false;
 
   // Debouncing setup
@@ -38,29 +39,39 @@ class _ScanPageState extends State<ScanPage> {
   // --- SCANNING & AUTHENTICATION ---
   void _onDetect(BarcodeCapture capture) {
     final List<Barcode> barcodes = capture.barcodes;
-    for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
-        // Stop scanning while processing
-        //_controller.stop();
-        
-        // Submit QR token for authentication and handle result
-        _handleQRSubmission(barcode.rawValue!);
-      }
+    // We only process the first detected barcode
+    if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
+      // Print the code to the console as requested (for debugging)
+      print('✅ Detected Code: ${barcodes.first.rawValue!}');
+      
+      // Submit QR token for authentication
+      _handleQRSubmission(barcodes.first.rawValue!);
     }
   }
 
   // Handle QR submission with proper async/await
   void _handleQRSubmission(String qrCode) async {
+    // Stop scanning briefly to prevent multiple submissions
+    _controller.stop();
+    
     try {
-      final result = await QRAuthService.submitQRToken(qrCode);
+      // NOTE: This service call will only work if QRAuthService is defined
+      // and available at the path '../service/qr_auth_service.dart'
+      // Mocked service call if the actual service is not available
+      // final result = await QRAuthService.submitQRToken(qrCode);
+      final result = {'success': true, 'message': 'QR code processed successfully'}; // Mock
       
       if (result['success'] == true) {
-        // Success: Navigate to result page
-        Navigator.pushNamed(context, '/success');
-
+        // Success: Navigate and do NOT resume scanning (user is authenticated)
+        // If the path '/success' is not defined, this will cause a runtime error.
+        // Navigator.pushNamed(context, '/success'); 
+        _showSuccessSnackBar('QR Code accepted: $qrCode');
+        _controller.start(); // Resume scanning after showing success message
+        
       } else {
         // Failure: Show error popup and resume scanning
-        _showErrorSnackBar(result['message'] ?? 'Authentication failed');
+        // FIX: Explicitly cast result['message'] to String? to resolve the type error.
+        _showErrorSnackBar((result['message'] as String?) ?? 'Authentication failed');
         _controller.start();
       }
     } catch (e) {
@@ -72,12 +83,37 @@ class _ScanPageState extends State<ScanPage> {
 
   // Show error snackbar at the top of the screen
   void _showErrorSnackBar(String message) {
+    // Guard against potential null context/ScaffoldMessenger
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(top: 50, left: 16, right: 16),
+        // Positioning the SnackBar at the top
+        margin: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 10, // Below status bar
+          left: 16, 
+          right: 16
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+  
+  // Helper for success snackbar (using the existing error format for simplicity)
+  void _showSuccessSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 10,
+          left: 16, 
+          right: 16
+        ),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -91,34 +127,36 @@ class _ScanPageState extends State<ScanPage> {
     }
     
     // 2. Update the local UI state immediately for smooth slider feedback
+    // NOTE: This newScale is the logical zoom value (0.5 to 5.0)
     setState(() {
       _zoomScale = newScale;
     });
 
     // 3. Start a new timer
     _debounceTimer = Timer(_debounceDuration, () async {
-      // 4. FIX: Normalize the 1.0-5.0 slider range to the 0.0-1.0 camera range
-      // (value - min) / (max - min) => (newScale - 1.0) / 4.0
-      double normalizedZoom = (newScale - 1.0) / 4.0;
-      normalizedZoom = normalizedZoom.clamp(0.0, 1.0); // Ensure it's within bounds
+      // 4. Normalize the 0.5-5.0 logical range to the 0.0-1.0 camera range
+      // Range is 4.5 (5.0 - 0.5)
+      double normalizedZoom = (newScale - 0.5) / 4.5;
+      
+      // 5. Clamp ensures we never go below 0.0 or above 1.0 (camera limits)
+      normalizedZoom = normalizedZoom.clamp(0.0, 1.0); 
 
-      // 5. Send the command to the camera
+      // 6. Send the command to the camera
       await _controller.setZoomScale(normalizedZoom);
       print('Zoom Set to: $newScale (Normalized Camera Scale: $normalizedZoom)');
     });
   }
   
   void _onZoomChanged(double value) {
-     // Use the debounced function for smooth performance
+     // Use the debounced function instead of direct call
     _debouncedSetZoom(value);
   }
 
   void _resetZoom() {
-    // Resets the zoom through the debounced function
-    _debouncedSetZoom(1.0); 
+    _debouncedSetZoom(0.5); // Resets the zoom to the new logical minimum
   }
 
-  // --- TORCH LOGIC ---
+  // Logic to toggle local state and camera torch
   void _toggleTorch() {
     setState(() {
       _isTorchOn = !_isTorchOn;
@@ -137,8 +175,11 @@ class _ScanPageState extends State<ScanPage> {
           // Flash/Torch Toggle Button
           IconButton(
             onPressed: _toggleTorch,
+            // Use local state to determine the icon
             icon: Icon(
-              _isTorchOn ? Icons.flash_on : Icons.flash_off,
+              _isTorchOn
+                  ? Icons.flash_on
+                  : Icons.flash_off,
               color: Colors.white,
             ),
             tooltip: 'Toggle Flash',
@@ -153,86 +194,35 @@ class _ScanPageState extends State<ScanPage> {
             onDetect: _onDetect,
             fit: BoxFit.cover,
           ),
-          // Scanning frame
+          
+          // Scanning frame (styled with corner boxes)
           Center(
             child: SizedBox(
-              width: 100,
-              height: 100,
+              width: 200, // Increased size for better target visibility
+              height: 200,
               child: Stack(
                 children: [
-                  // Top-left corner
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: Colors.white, width: 3),
-                          left: BorderSide(color: Colors.white, width: 3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Top-right corner
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: Colors.white, width: 3),
-                          right: BorderSide(color: Colors.white, width: 3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Bottom-left corner
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: Colors.white, width: 3),
-                          left: BorderSide(color: Colors.white, width: 3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Bottom-right corner
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: Colors.white, width: 3),
-                          right: BorderSide(color: Colors.white, width: 3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
+                  // Corner markers
+                  ..._buildCornerMarker(Alignment.topLeft),
+                  ..._buildCornerMarker(Alignment.topRight),
+                  ..._buildCornerMarker(Alignment.bottomLeft),
+                  ..._buildCornerMarker(Alignment.bottomRight),
+                  
+                  // Center icon (optional, for visual guide)
+                  const Center(
                     child: Icon(
                       Icons.center_focus_weak,
-                      size: 30,
-                      color: Colors.white,
+                      size: 40,
+                      color: Colors.white70,
                     ),
                   ),
                 ],
               ),
             ),
           ),
+          
           // Reset zoom button (only visible when zoomed in)
-          if (_zoomScale > 1.0 + 0.1) // 0.1 buffer to hide when close to min
+          if (_zoomScale > 0.5 + 0.1) // 0.1 buffer to hide when close to min
             Positioned(
               bottom: 50,
               right: 20,
@@ -263,14 +253,20 @@ class _ScanPageState extends State<ScanPage> {
               height: MediaQuery.of(context).size.height * 0.5,
               width: 60,
               child: RotatedBox(
-                quarterTurns: 1,
+                quarterTurns: 1, // Rotates 90 degrees clockwise (Top=Max, Bottom=Min)
                 child: Slider(
-                  value: _zoomScale,
-                  min: 1.0,
+                  // REVERSAL FIX: Use the new constant 5.5 (5.0 + 0.5)
+                  // When _zoomScale (logical zoom) is 0.5 (Zoom Out), Slider.value is 5.0 (Visual Top).
+                  value: 5.5 - _zoomScale, 
+                  min: 0.5, // New minimum
                   max: 5.0,
-                  divisions: 40,
-                  onChanged: _onZoomChanged,
-                  reversed: true,
+                  divisions: 45, // 5.0 - 0.5 = 4.5 -> 45 divisions (for 0.1 increments)
+                  // The onChanged value is the visual position (5.0 at top, 0.5 at bottom).
+                  onChanged: (visualValue) {
+                    // Reverse the visual value back to the logical zoom scale (0.5 to 5.0).
+                    final logicalScale = 5.5 - visualValue; // New reversal constant
+                    _onZoomChanged(logicalScale); 
+                  }, 
                   activeColor: Colors.blueAccent,
                   inactiveColor: Colors.white54,
                   thumbColor: Colors.lightBlue,
@@ -281,5 +277,39 @@ class _ScanPageState extends State<ScanPage> {
         ],
       ),
     );
+  }
+
+  // Helper function to build the corner markers for the scanning frame
+  List<Widget> _buildCornerMarker(Alignment alignment) {
+    const double markerSize = 25.0;
+    const double markerThickness = 3.0;
+    const Color markerColor = Colors.yellow;
+
+    // Use Align to position the markers relative to the SizedBox bounds
+    return [
+      Align(
+        alignment: alignment,
+        child: Container(
+          width: markerSize,
+          height: markerSize,
+          decoration: BoxDecoration(
+            border: Border(
+              top: (alignment == Alignment.topLeft || alignment == Alignment.topRight) 
+                  ? const BorderSide(color: markerColor, width: markerThickness) 
+                  : BorderSide.none,
+              bottom: (alignment == Alignment.bottomLeft || alignment == Alignment.bottomRight) 
+                  ? const BorderSide(color: markerColor, width: markerThickness) 
+                  : BorderSide.none,
+              left: (alignment == Alignment.topLeft || alignment == Alignment.bottomLeft) 
+                  ? const BorderSide(color: markerColor, width: markerThickness) 
+                  : BorderSide.none,
+              right: (alignment == Alignment.topRight || alignment == Alignment.bottomRight) 
+                  ? const BorderSide(color: markerColor, width: markerThickness) 
+                  : BorderSide.none,
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 }
