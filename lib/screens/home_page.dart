@@ -12,6 +12,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+   bool _isFetchingAttendance = false;
+
   @override
   void initState() {
     super.initState();
@@ -129,11 +131,21 @@ Widget _buildInfoRow(IconData icon, String text) {
     required String label,
     required IconData icon,
     required VoidCallback onPressed,
+    bool isLoading = false, 
   }) {
     return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      label: Text(label),
+      onPressed: isLoading ? null : onPressed,
+      icon: isLoading
+          ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Colors.white,
+              ),
+            )
+          : Icon(icon),
+      label: Text(isLoading ? 'Fetching Data...' : label),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 36),
       ),
@@ -172,9 +184,31 @@ Widget _buildInfoRow(IconData icon, String text) {
                 _buildActionButton(
                   label: 'Check Attendance',
                   icon: Icons.bar_chart,
-                  onPressed: () {
-                    AttendanceService.fetchAttendance();
-                    Navigator.pushNamed(context, '/attendance');
+                  isLoading: _isFetchingAttendance, // Pass the loading state
+                  onPressed: () async {
+                    if (_isFetchingAttendance || !context.mounted) return;
+
+                    setState(() {
+                      _isFetchingAttendance = true;
+                    });
+
+                    try {
+                      // CRUCIAL: Await the API call to ensure data is populated before navigating.
+                      await AttendanceService.fetchAttendance();
+
+                      if (context.mounted) {
+                        Navigator.pushNamed(context, '/attendance');
+                      }
+                    } catch (e) {
+                      // Optional: Add a mechanism to show an error message if the fetch fails
+                      print('Attendance fetch failed: $e');
+                    } finally {
+                      if (context.mounted) {
+                        setState(() {
+                          _isFetchingAttendance = false;
+                        });
+                      }
+                    }
                   },
                 ),
                 const Spacer(),
