@@ -36,14 +36,10 @@ class _ScanPageState extends State<ScanPage> {
     super.dispose();
   }
 
-  // --- SCANNING & AUTHENTICATION ---
   void _onDetect(BarcodeCapture capture) {
     final List<Barcode> barcodes = capture.barcodes;
     // We only process the first detected barcode
-    if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
-      // Print the code to the console as requested (for debugging)
-      print('✅ Detected Code: ${barcodes.first.rawValue!}');
-      
+    if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {      
       // Submit QR token for authentication
       _handleQRSubmission(barcodes.first.rawValue!);
     }
@@ -51,39 +47,26 @@ class _ScanPageState extends State<ScanPage> {
 
   // Handle QR submission with proper async/await
   void _handleQRSubmission(String qrCode) async {
-    // Stop scanning briefly to prevent multiple submissions
-    _controller.stop();
+    //_controller.stop();
     
     try {
-      // NOTE: This service call will only work if QRAuthService is defined
-      // and available at the path '../service/qr_auth_service.dart'
-      // Mocked service call if the actual service is not available
-      // final result = await QRAuthService.submitQRToken(qrCode);
-      final result = {'success': true, 'message': 'QR code processed successfully'}; // Mock
       
+      final result = await QRAuthService.submitQRToken(qrCode);
+
       if (result['success'] == true) {
-        // Success: Navigate and do NOT resume scanning (user is authenticated)
-        // If the path '/success' is not defined, this will cause a runtime error.
-        // Navigator.pushNamed(context, '/success'); 
-        _showSuccessSnackBar('QR Code accepted: $qrCode');
-        _controller.start(); // Resume scanning after showing success message
+       Navigator.pushNamed(context, '/success');
         
       } else {
-        // Failure: Show error popup and resume scanning
-        // FIX: Explicitly cast result['message'] to String? to resolve the type error.
         _showErrorSnackBar((result['message'] as String?) ?? 'Authentication failed');
         _controller.start();
       }
     } catch (e) {
-      // Exception: Show error popup and resume scanning
       _showErrorSnackBar('Error: ${e.toString()}');
       _controller.start();
     }
   }
 
-  // Show error snackbar at the top of the screen
   void _showErrorSnackBar(String message) {
-    // Guard against potential null context/ScaffoldMessenger
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

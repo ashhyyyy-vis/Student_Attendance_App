@@ -21,7 +21,7 @@ class QRAuthService {
       }
 
       debugPrint('Submitting QR token: $qrToken');
-
+      String scannedAt=DateTime.now().millisecondsSinceEpoch.toString();
       final response = await http.post(
         Uri.parse('${globals.baseurl}/api/student/scan'),
         headers: {
@@ -30,7 +30,7 @@ class QRAuthService {
         },
         body: jsonEncode({
           'qrToken': qrToken,
-          'scannedAt': DateTime.now().millisecondsSinceEpoch,
+          'scannedAt': scannedAt,
           'role':"student"
         }),
       );
@@ -40,6 +40,7 @@ class QRAuthService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        globals.timer=responseData['timer']-scannedAt;
         return {
           'success': true,
           'message': responseData['message'] ?? 'QR token submitted successfully',
@@ -71,58 +72,6 @@ class QRAuthService {
         'success': false,
         'message': 'Network error: ${e.toString()}',
         'data': null
-      };
-    }
-  }
-
-  static Future<Map<String, dynamic>> validateQRToken(String qrToken) async {
-    try {
-      final String? token = await _storage.read(key: 'auth_token');
-      
-      if (token == null) {
-        return {
-          'success': false,
-          'message': 'Authentication token not found',
-          'data': null
-        };
-      }
-
-      debugPrint('Validating QR token: $qrToken');
-
-      final response = await http.post(
-        Uri.parse('${globals.baseurl}/api/qr/validate'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'qrToken': qrToken,
-        }),
-      );
-
-      debugPrint('QR validation response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        return {
-          'success': true,
-          'message': responseData['message'] ?? 'QR token is valid',
-          'sessionId': responseData['data'] ?? null
-        };
-      } else {
-        final responseData = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': responseData['message'] ?? 'Invalid QR token',
-          'sessionId': null
-        };
-      }
-    } catch (e) {
-      debugPrint('Error validating QR token: $e');
-      return {
-        'success': false,
-        'message': 'Network error: ${e.toString()}',
-        'sessionId': null
       };
     }
   }
