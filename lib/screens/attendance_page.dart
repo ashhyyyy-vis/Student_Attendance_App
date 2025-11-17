@@ -2,47 +2,118 @@ import 'package:flutter/material.dart';
 import '../utils/globals.dart' as globals;
 
 class AttendancePage extends StatelessWidget {
-
   const AttendancePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final attended = globals.attendanceCount;
-    final total = globals.totalDays;
-    final percent = total == 0 ? 0.0 : (attended / total) * 100;
+    final List<globals.AttendanceData> attendanceList = globals.attendanceData;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Your Attendance')),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text('Attendance Overview',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
-            SizedBox(height: 12),
-            Card(
-              color: Colors.grey[900],
-              child: ListTile(
-                title: Text('$attended / $total days attended'),
-                subtitle: LinearProgressIndicator(
-                  value: total == 0 ? 0.0 : attended / total,
-                  minHeight: 10,
-                ),
-                trailing: Text('${percent.toStringAsFixed(1)}%'),
+      appBar: AppBar(title: const Text('Your Attendance')),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(globals.wallpaperImage), // 🔥 Your background image
+            fit: BoxFit.cover,                 // Makes it fill the screen
+            opacity: 0.25,                     // Slight dim so text is readable
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Attendance Overview',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
               ),
-            ),
-            SizedBox(height: 18),
-            Text(
-              globals.scannedToday
-                  ? 'You have marked attendance today.'
-                  : 'You have not marked attendance today.',
-            ),
-            SizedBox(height: 18),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('Back')),
-          ],
+              const SizedBox(height: 12),
+              Expanded(
+                child: attendanceList.isEmpty
+                    ? const Center(
+                        child: Text('No attendance records found'),
+                      )
+                    : ListView.builder(
+                        itemCount: attendanceList.length,
+                        itemBuilder: (context, index) {
+                          final data = attendanceList[index];
+                          final percent = data.total == 0
+                              ? 0.0
+                              : (data.present / data.total) * 100;
+
+                          return Card(
+                            color: Colors.grey[900]?.withOpacity(0.85), // for readability
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data.courseName,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    data.courseCode,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${data.present} / ${data.total} classes',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  LinearProgressIndicator(
+                                    value: data.total == 0
+                                        ? 0.0
+                                        : data.present / data.total,
+                                    minHeight: 10,
+                                    backgroundColor: Colors.black26,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                      Colors.white70,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      '${percent.toStringAsFixed(1)}%',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Back'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
