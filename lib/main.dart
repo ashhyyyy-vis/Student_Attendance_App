@@ -13,17 +13,7 @@ void main() async {
   
   String initialRoute = '/';
   if (isLoggedIn) {
-    final prefs = await SharedPreferences.getInstance();
-    final lastRoute = prefs.getString('last_route');
-    final lastRouteTime = prefs.getInt('last_route_time');
-    final now = DateTime.now().millisecondsSinceEpoch;
-    
-    // Only restore route if it was set within the last 5 minutes
-    if (lastRoute != null && lastRouteTime != null && (now - lastRouteTime) < 300000) {
-      initialRoute = lastRoute;
-    } else {
-      initialRoute = '/home';
-    }
+    initialRoute = '/home';
   }
   
   runApp(MyApp(initialRoute: initialRoute));
