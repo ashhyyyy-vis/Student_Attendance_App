@@ -48,3 +48,5 @@ app.*.map.json
 lib/utils/globals.dart
 
 contents.txt
+
+points.txt
