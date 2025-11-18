@@ -14,7 +14,7 @@ class _SuccessPageState extends State<SuccessPage> {
   bool _canGoBack = false;
   bool _routeSaved = false;
   final double timer=globals.timer;
-  int _countdown = 90;
+  int _countdown = 5;
   
   @override
   void initState() {
