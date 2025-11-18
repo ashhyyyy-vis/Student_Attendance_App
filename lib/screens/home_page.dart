@@ -286,17 +286,10 @@ Widget _buildInfoRow( String text) {
                 ),
                 const Spacer(),
               // In the build method, replace the existing Align widget with:
-                Container(
-                  width: 400,
-                  color: Colors.black,
-                  padding: const EdgeInsets.only(left:1,right:1,top:1,bottom:1),
-                  child: Center(
-                    child: Image.asset(
-                      globals.logoLarge,
-                      height: 80,  // Slightly reduced height
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+                Image.asset(
+                  globals.logoLarge,
+                  height: 80,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 20),
               ],
