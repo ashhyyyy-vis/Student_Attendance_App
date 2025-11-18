@@ -107,12 +107,18 @@ Widget _buildStudentCard() {
                           width: 110,
                           height: 110,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.white70,
+                            );
+                          },
                         )
-                      : Image.asset(
-                          globals.userPic,
-                          width: 110,
-                          height: 110,
-                          fit: BoxFit.cover,
+                      : Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.white70,
                         ),
                 ),
               ),
