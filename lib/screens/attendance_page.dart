@@ -94,6 +94,7 @@ class AttendancePage extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 8),
                                   LinearProgressIndicator(
+                                    //Used for progress bar
                                     value: data.total == 0
                                         ? 0.0
                                         : data.present / data.total,
