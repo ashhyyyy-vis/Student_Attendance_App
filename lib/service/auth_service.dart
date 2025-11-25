@@ -6,18 +6,21 @@ import 'package:flutter/foundation.dart';
 import '../utils/globals.dart' as globals;
 
 class AuthService {
-  static const _storage = FlutterSecureStorage();
+  static http.Client? httpClientForTests;
+  static FlutterSecureStorage? storageForTests;
+
+  static FlutterSecureStorage get _storage =>storageForTests ?? const FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
   static const _idKey = 'auth_id';
-
+  // TEST HOOKS (used only during unit tests)
   // Login method with enhanced error handling
   static Future<bool> login(String email, String password) async {
     try {
       if (kDebugMode) {
         print('Attempting login for email: $email');
       }
-
-      final response = await http.post(
+      final client = httpClientForTests ?? http.Client();
+      final response = await client.post(
         Uri.parse('${globals.baseurl}/api/auth/login'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',

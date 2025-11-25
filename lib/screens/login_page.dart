@@ -29,39 +29,39 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _loading = true);
-  
-  try {
+    setState(() => _loading = true);
+
+    try {
       final success = await auth.login(
-      _userController.text.trim(),
-      _passController.text,
-    );
+        _userController.text.trim(),
+        _passController.text,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (success) {
+      if (success) {
       if (!mounted) return;
       //modify likewise
-      globals.isLoggedIn = true;
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
+        globals.isLoggedIn = true;
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please try again.')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again.')),
-      );
-    }
-  } catch (e) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Login failed: ${e.toString()}')),
-    );
-  } finally {
-    if (mounted) {
-      setState(() => _loading = false);
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
-}
 
   @override
   void dispose() {
@@ -130,12 +130,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 10),
                     Align(alignment: Alignment.centerRight,
-                     child: TextButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
+                      child: TextButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
                                 title: const Text(
                                   "Forgot Password",
                                   style: TextStyle(color: Colors.white),
@@ -144,21 +144,21 @@ class _LoginPageState extends State<LoginPage> {
                                   "Password Services under development currently.\n Please contact the admin\n admin@iitp.ac.in",
                                   style: TextStyle(color: Colors.white),
                                 ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
                                     child: const Text(
                                       "Close",
                                       style: TextStyle(color: Colors.white),
                                     ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: const Text(
-                        'Forgot Password?',
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: const Text(
+                          'Forgot Password?',
                           style:
                               TextStyle(fontSize: 14, color: Colors.black),
                         ),
