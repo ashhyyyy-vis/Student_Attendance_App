@@ -6,7 +6,10 @@ import '../utils/globals.dart' as globals;
 import '../service/auth_service.dart';
 
 class QRAuthService {
-  static const _storage = FlutterSecureStorage(); 
+  static http.Client? httpClientForTests;
+  static FlutterSecureStorage? storageForTests;
+  static const FlutterSecureStorage _defaultStorage = FlutterSecureStorage();
+  static FlutterSecureStorage get _storage => storageForTests ?? _defaultStorage;
   static Future<Map<String, dynamic>> submitQRToken(String qrToken) async {
     try {
       // Get auth token from secure storage
@@ -19,21 +22,21 @@ class QRAuthService {
           'data': null
         };
       }
-
       debugPrint('Submitting QR token: $qrToken');
       String scannedAt=DateTime.now().millisecondsSinceEpoch.toString();
-      final response = await http.post(
+      final client = httpClientForTests ?? http.Client();
+      final response = await client.post(
         Uri.parse('${globals.baseurl}/api/student/scan'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'qrToken': qrToken,
-          'scannedAt': scannedAt,
-          'role':"student"
-        }),
-      );
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'qrToken': qrToken,
+            'scannedAt': scannedAt,
+            'role':"student"
+          }),
+        );
 
       debugPrint('QR submission response status: ${response.statusCode}');
       debugPrint('QR submission response body: ${response.body}');
@@ -41,8 +44,10 @@ class QRAuthService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['timer'] != null) {
-          globals.timer=(responseData['timer']-scannedAt)/1000;
+          final scannedAtInt = int.tryParse(scannedAt) ?? 0;
+          globals.timer = (responseData['timer'] - scannedAtInt) / 1000;
         }
+
         return {
           'success': true,
           'message': responseData['message'] ?? 'QR token submitted successfully',
