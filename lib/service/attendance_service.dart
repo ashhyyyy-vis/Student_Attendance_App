@@ -6,13 +6,14 @@ import 'auth_service.dart';
 import '../utils/globals.dart' as globals;
 
 class AttendanceService {
-  
+  static http.Client? httpClientForTests;
   // Fetch attendance from API
   static Future<void> fetchAttendance() async {
   try {
     final token = await AuthService.getToken();
     final id = await AuthService.getID();
-    final response = await http.get(
+    final client = httpClientForTests ?? http.Client();
+    final response = await client.get(
       Uri.parse('${globals.baseurl}/api/report/student/${id}'),
       headers: {
         'Authorization': 'Bearer $token',
