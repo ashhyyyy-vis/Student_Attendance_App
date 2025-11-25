@@ -15,13 +15,26 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
+  late AuthService auth;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Dependency Injected Auth Service
+    auth = AuthService(
+      client: http.Client(),
+      storage: const FlutterSecureStorage(),
+    );
+  }
+
   void _login() async {
   if (!_formKey.currentState!.validate()) return;
 
   setState(() => _loading = true);
   
   try {
-    final success = await AuthService.login(
+      final success = await auth.login(
       _userController.text.trim(),
       _passController.text,
     );
@@ -34,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
       globals.isLoggedIn = true;
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login failed. Please try again.')),
       );
@@ -75,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.transparent,  // Slightly transparent white
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Form(
@@ -84,9 +96,9 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
-                      globals.logoSmall,  // Replace with your image URL
-                      height: 80,  // Adjust height as needed
-                      width: 80,   // Adjust width as needed
+                      globals.logoSmall,
+                      height: 80,
+                      width: 80,
                       fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 24),
@@ -94,7 +106,10 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _userController,
                       style: const TextStyle(color: Colors.black),
-                      decoration: const InputDecoration(labelText: 'Email',labelStyle: TextStyle(color: Colors.black)),
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: TextStyle(color: Colors.black),
+                      ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
@@ -103,10 +118,15 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _passController,
                       style: const TextStyle(color: Colors.black),
-                      decoration: const InputDecoration(labelText: 'Password',labelStyle: TextStyle(color: Colors.black)),
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: TextStyle(color: Colors.black),
+                      ),
                       obscureText: true,
                       validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+
+                    Align(
+                      alignment: Alignment.centerRight,
                     ),
                     const SizedBox(height: 10),
                     Align(alignment: Alignment.centerRight,
@@ -116,12 +136,21 @@ class _LoginPageState extends State<LoginPage> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text("Forgot Password",style: TextStyle(color: Colors.white)),
-                              content: const Text("Password Services under development currently.\n Please contact the admin\n admin@iitp.ac.in",style: TextStyle(color: Colors.white)),
+                                title: const Text(
+                                  "Forgot Password",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                content: const Text(
+                                  "Password Services under development currently.\n Please contact the admin\n admin@iitp.ac.in",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text("Close",style: TextStyle(color: Colors.white)),
+                                    child: const Text(
+                                      "Close",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                 ),
                               ],
                             );
@@ -130,17 +159,21 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: const Text(
                         'Forgot Password?',
-                        style: TextStyle(fontSize: 14,
-                        color: Colors.black)
+                          style:
+                              TextStyle(fontSize: 14, color: Colors.black),
+                        ),
                       ),
                     ),
-                    ),
+
                     const SizedBox(height: 18),
                     _loading
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: _login,
-                            child: const Text('Login', style: TextStyle(color: Colors.white)),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                   ],
                 ),
