@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
 import 'mocks.mocks.dart';
-import '../lib/service/qr_auth_service.dart';
-import '../lib/service/auth_service.dart'; // For globals if needed
+import 'package:StudentApp/service/qr_auth_service.dart';
+import 'package:StudentApp/service/auth_service.dart'; // For globals if needed
 
 void main() {
   late MockFlutterSecureStorage mockStorage;

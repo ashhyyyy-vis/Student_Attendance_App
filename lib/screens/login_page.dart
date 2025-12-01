@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/globals.dart' as globals;
 import '../service/auth_service.dart';
 
@@ -15,17 +17,10 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
-  late AuthService auth;
-
   @override
   void initState() {
     super.initState();
-
-    // Dependency Injected Auth Service
-    auth = AuthService(
-      client: http.Client(),
-      storage: const FlutterSecureStorage(),
-    );
+    // No need to initialize AuthService as it's using static methods
   }
 
   void _login() async {
@@ -34,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = true);
 
     try {
-      final success = await auth.login(
+      final success = await AuthService.login(
         _userController.text.trim(),
         _passController.text,
       );
@@ -42,8 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (success) {
-      if (!mounted) return;
-      //modify likewise
+        if (!mounted) return;
         globals.isLoggedIn = true;
         Navigator.pushReplacementNamed(context, '/home');
       } else {
@@ -109,11 +103,13 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         labelStyle: TextStyle(color: Colors.black),
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                       validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          (v == null || v.trim().isEmpty) ? 'Email is required' : null,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
 
                     TextFormField(
                       controller: _passController,
@@ -121,12 +117,12 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: const InputDecoration(
                         labelText: 'Password',
                         labelStyle: TextStyle(color: Colors.black),
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                       obscureText: true,
                       validator: (v) =>
-
-                    Align(
-                      alignment: Alignment.centerRight,
+                          (v == null || v.trim().isEmpty) ? 'Password is required' : null,
                     ),
                     const SizedBox(height: 10),
                     Align(alignment: Alignment.centerRight,

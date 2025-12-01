@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mocks.mocks.dart';
-import '../lib/service/auth_service.dart';
+import 'package:StudentApp/service/auth_service.dart';
+import 'package:StudentApp/utils/globals.dart' as globals;
 
 void main() {
   late MockFlutterSecureStorage mockStorage;
